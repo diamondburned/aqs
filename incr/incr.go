@@ -3,6 +3,7 @@ package incr
 
 import (
 	"hash/maphash"
+	"log"
 	"math/rand"
 	"sync"
 
@@ -34,23 +35,32 @@ func (s *State) Next() int {
 var randmap = map[uint64]*State{}
 var randmut = sync.Mutex{}
 
+var hasher maphash.Hash
+
+func init() {
+	hasher = maphash.Hash{}
+	hasher.SetSeed(maphash.MakeSeed())
+}
+
 // RandomQuote returns a random quote using a global randomly-permutated
 // increment map. This function is safe for concurrent use. The unique
 // constraint for this function is the character's name and anime.
 func RandomQuote(char aqs.Character) string {
-	hash := maphash.Hash{}
-	hash.WriteString(char.Name)
-	hash.WriteString(char.Anime)
-	u := hash.Sum64()
-
 	randmut.Lock()
 	defer randmut.Unlock()
+
+	hasher.WriteString(char.Name)
+	hasher.WriteString(char.Anime)
+	u := hasher.Sum64()
+	hasher.Reset()
 
 	st, ok := randmap[u]
 	if !ok {
 		st = New(len(char.Quotes))
 		randmap[u] = st
 	}
+
+	log.Println("State:", u, char.Name, st)
 
 	return char.Quotes[st.Next()]
 }
