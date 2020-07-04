@@ -3,7 +3,6 @@ package incr
 
 import (
 	"hash/maphash"
-	"log"
 	"math/rand"
 	"sync"
 
@@ -59,8 +58,6 @@ func RandomQuote(char aqs.Character) string {
 		st = New(len(char.Quotes))
 		randmap[u] = st
 	}
-
-	log.Println("State:", u, char.Name, st)
 
 	return char.Quotes[st.Next()]
 }
