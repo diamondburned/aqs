@@ -68,11 +68,13 @@ func (c Character) RandomQuote() string {
 
 const maxu64 = float64(math.MaxUint64)
 
+var mapseed = maphash.MakeSeed()
+
 // NameColor returns a consistent name color for the character.
 func (c Character) NameColor() colorful.Color {
 	hash := maphash.Hash{}
+	hash.SetSeed(mapseed)
 	hash.WriteString(c.Name)
-	hash.Sum64()
 
 	hue := float64(hash.Sum64()) / maxu64 * 360
 	return colorful.Hsl(hue, Saturation, Luminance)
