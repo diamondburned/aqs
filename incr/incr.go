@@ -9,24 +9,20 @@ import (
 	"github.com/diamondburned/aqs"
 )
 
+// State provides an incremental permutation state. It is thread-safe.
 type State struct {
 	permus []int
 	ptr    int
 }
 
 func New(n int) *State {
-	// Numerical Recipes' LCG.
-	return &State{rand.Perm(n), 0}
+	return &State{permus: rand.Perm(n), ptr: 0}
 }
 
 // Next returns the next random index.
 func (s *State) Next() int {
 	i := s.ptr
-
-	s.ptr++
-	if s.ptr >= len(s.permus) {
-		s.ptr = 0
-	}
+	s.ptr = (i + 1) % len(s.permus)
 
 	return s.permus[i]
 }
@@ -45,6 +41,10 @@ func init() {
 // increment map. This function is safe for concurrent use. The unique
 // constraint for this function is the character's name and anime.
 func RandomQuote(char aqs.Character) string {
+	if len(char.Quotes) == 0 {
+		return ""
+	}
+
 	randmut.Lock()
 	defer randmut.Unlock()
 
